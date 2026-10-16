@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TNPSC Group 4 Photo & Signature Resizer Tool</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Noto Sans Tamil -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans Tamil', sans-serif;
+        }
+        .canvas-checkerboard {
+            background-color: #f8fafc;
+            background-image: 
+                linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+                linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+                linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header & Navigation -->
+    <header class="bg-gradient-to-r from-emerald-800 via-teal-800 to-indigo-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center border border-white/20 text-yellow-300 text-xl font-bold">
+                    <i class="fa-solid fa-file-shield"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight">TNPSC Photo & Sign Resizer</h1>
+                    <p class="text-xs text-emerald-200">குரூப் 4 & அரசுத் தேர்வுகளுக்கான அதிகாரப்பூர்வ பட அமைப்பாளர்</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+                    <i class="fa-solid fa-circle-check mr-1.5 text-emerald-400"></i> 100% Free & Client-Side (பாதுகாப்பானது)
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- TNPSC Rules Banner Alert -->
+        <div class="mb-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-lg bg-amber-500 text-white flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="text-xs sm:text-sm text-amber-950">
+                    <h2 class="font-bold text-sm sm:text-base text-amber-900 mb-1">TNPSC குரூப் 4 விதிமுறைகள் (Official Specifications):</h2>
+                    <ul class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 font-medium">
+                        <li class="flex items-center gap-2">
+                            <i class="fa-solid fa-camera text-amber-700"></i>
+                            <span><strong>புகைப்படம்:</strong> 3.5cm x 4.5cm (White Background), <strong>20 KB - 50 KB</strong>, பெயர் மற்றும் படம் எடுத்த தேதி கீழே இருக்க வேண்டும்.</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fa-solid fa-signature text-amber-700"></i>
+                            <span><strong>கையெழுத்து:</strong> 6.0cm x 2.0cm, <strong>10 KB - 20 KB</strong> (நீலம் அல்லது கருப்பு மை கொண்டு வெள்ளைத் தாளில் இட்டது).</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tool Selection Tabs -->
+        <div class="flex border-b border-slate-200 mb-6 gap-2">
+            <button id="tab-photo-btn" onclick="switchTab('photo')" class="flex items-center gap-2.5 px-6 py-3 font-semibold text-sm rounded-t-xl transition-all border-b-2 border-emerald-600 bg-white text-emerald-700 shadow-sm">
+                <i class="fa-regular fa-image text-emerald-600 text-base"></i> 1. புகைப்பட மாற்றி (Photo Tool)
+            </button>
+            <button id="tab-sign-btn" onclick="switchTab('sign')" class="flex items-center gap-2.5 px-6 py-3 font-semibold text-sm rounded-t-xl transition-all border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100">
+                <i class="fa-solid fa-pen-nib text-base"></i> 2. கையெழுத்து மாற்றி (Signature Tool)
+            </button>
+        </div>
+
+        <!-- ==========================================
+             SECTION 1: PHOTO GENERATOR & RESIZER
+        ========================================== -->
+        <section id="photo-section" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Controls Form Column -->
+            <div class="lg:col-span-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
+                    <span><i class="fa-solid fa-sliders text-emerald-600 mr-2"></i>புகைப்பட விவரங்கள்</span>
+                    <span class="text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md font-medium border border-emerald-200">அரசு தர அளவு</span>
+                </h3>
+
+                <!-- Upload Box -->
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">1. உங்கள் புகைப்படத்தை தேர்ந்தெடுக்கவும்</label>
+                    <div id="photo-drop-zone" class="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-xl p-5 text-center cursor-pointer bg-slate-50 hover:bg-emerald-50/40 transition">
+                        <input type="file" id="photo-input" accept="image/jpeg,image/png,image/webp,image/jpg" class="hidden">
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400 mb-2"></i>
+                            <p class="text-sm font-semibold text-slate-700">இங்கே கிளிக் செய்து போட்டோவை அப்லோடு செய்யவும்</p>
+                            <p class="text-xs text-slate-400 mt-1">JPG, PNG அல்லது WebP (மொபைல் கேமரா போட்டோக்களும் ஏற்கப்படும்)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Background Processing & White Fill -->
+                <div class="mb-5 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <span class="text-sm font-bold text-slate-800">வெள்ளை பின்புலம் (White Background)</span>
+                            <p class="text-xs text-slate-500">TNPSC விதிப்படி பின்புலம் வெள்ளையாக மாற்றப்படும்</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="photo-bg-white" checked class="sr-only peer">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                        </label>
+                    </div>
+                    
+                    <div class="pt-2 border-t border-slate-200 flex flex-wrap gap-2 text-xs">
+                        <button type="button" onclick="autoRemoveBackdrop()" class="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-lg font-medium transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> ஸ்மார்ட் பேக்ரவுண்ட் க்ளீனர் (AI Filter)
+                        </button>
+                        <button type="button" onclick="resetAdjustments()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-medium transition">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> ரீசெட் (Reset)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Candidate Name & Date of Photo -->
+                <div class="space-y-4 mb-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">விண்ணப்பதாரர் பெயர் (Candidate Name in English)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-user text-sm"></i>
+                            </div>
+                            <input type="text" id="photo-name-input" placeholder="e.g. M. KARTHIK" class="w-full pl-9 pr-3 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none uppercase font-semibold">
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">பெயரை ஆங்கிலத்தில் பெரிய எழுத்துக்களில் (CAPITAL LETTERS) உள்ளிடவும்.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">புகைப்படம் எடுத்த தேதி (Date of Photo Taken)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-calendar-day text-sm"></i>
+                            </div>
+                            <input type="date" id="photo-date-input" class="w-full pl-9 pr-3 py-2.5 text-sm bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium">
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1">விளம்பர தேதிக்கு பிந்தைய சமீபத்திய தேதியை தேர்ந்தெடுக்கவும்.</p>
+                    </div>
+                </div>
+
+                <!-- Image Position & Zoom Controls -->
+                <div class="mb-5 p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+                    <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-2">போட்டோ அளவை சரிசெய்ய (Position & Zoom)</span>
+                    <div class="grid grid-cols-2 gap-3 mb-2">
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-500 mb-1">
+                                <span>பெரிதாக்க (Zoom)</span>
+                                <span id="zoom-val">100%</span>
+                            </div>
+                            <input type="range" id="photo-zoom" min="50" max="250" value="100" class="w-full accent-emerald-600">
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-500 mb-1">
+                                <span>மேல் / கீழ் (Y-Offset)</span>
+                                <span id="y-val">0</span>
+                            </div>
+                            <input type="range" id="photo-offset-y" min="-120" max="120" value="0" class="w-full accent-emerald-600">
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-slate-500">
+                        <span>இடது / வலது (X-Offset)</span>
+                        <input type="range" id="photo-offset-x" min="-100" max="100" value="0" class="w-1/2 accent-emerald-600">
+                    </div>
+                </div>
+
+                <!-- TNPSC Standard Dimension Choice -->
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">ரெசல்யூஷன் வகை (Dimension Specs)</label>
+                    <select id="photo-res-select" class="w-full py-2.5 px-3 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="standard" selected>3.5 cm x 4.5 cm (Standard 200 DPI - 276 x 354 px - பரிந்துரைக்கப்படுகிறது)</option>
+                        <option value="portal">TNPSC Portal Min: 130 x 170 pixels</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Preview & Download Column -->
+            <div class="lg:col-span-6 flex flex-col items-center">
+                <div class="sticky top-24 w-full bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
+                    <div class="w-full flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                        <span class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-eye text-emerald-600"></i> நேரடி முன்னோட்டம் (Live Preview)
+                        </span>
+                        <span id="photo-spec-pill" class="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded border border-emerald-200">
+                            இலக்கு: 20 KB - 50 KB
+                        </span>
+                    </div>
+
+                    <!-- Canvas Container -->
+                    <div class="p-3 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner flex justify-center items-center">
+                        <div class="canvas-checkerboard p-1 rounded-xl shadow-md border border-slate-300">
+                            <!-- Official TNPSC Canvas (Aspect ratio 3.5 : 4.5) -->
+                            <canvas id="photo-canvas" class="rounded block bg-white" width="276" height="354" style="max-height: 380px; width: auto;"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Live File Size Indicator -->
+                    <div class="w-full mt-4 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-600">உருவாக்கப்பட்ட கோப்பு அளவு (File Size):</span>
+                            <span id="photo-size-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800">
+                                0 KB
+                            </span>
+                        </div>
+                        <!-- Progress bar -->
+                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div id="photo-size-progress" class="bg-emerald-600 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                        <p id="photo-size-msg" class="text-[11px] text-slate-500 mt-1">
+                            புகைப்படம் தயார் ஆனவுடன் TNPSC வரம்பான 20 KB - 50 KB சரிபார்க்கப்படும்.
+                        </p>
+                    </div>
+
+                    <!-- Download Button -->
+                    <button type="button" id="photo-download-btn" onclick="downloadPhoto()" class="w-full mt-5 py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-download"></i> போட்டோவை பதிவிறக்கம் செய் (Download JPG)
+                    </button>
+                    <p class="text-center text-xs text-slate-400 mt-2">
+                        அரசு போர்ட்டலில் நேராக பதிவேற்றக்கூடிய தரத்தில் பதிவிறக்கப்படும்.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             SECTION 2: SIGNATURE GENERATOR & RESIZER
+        ========================================== -->
+        <section id="sign-section" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Signature Controls Column -->
+            <div class="lg:col-span-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
+                    <span><i class="fa-solid fa-file-signature text-emerald-600 mr-2"></i>கையெழுத்து விவரங்கள்</span>
+                    <span class="text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md font-medium border border-emerald-200">அரசு தர அளவு: 10KB - 20KB</span>
+                </h3>
+
+                <!-- Upload Mode Toggle -->
+                <div class="grid grid-cols-2 gap-2 mb-4 bg-slate-100 p-1 rounded-xl">
+                    <button type="button" id="sign-mode-upload" onclick="setSignMode('upload')" class="py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-emerald-700 transition">
+                        <i class="fa-solid fa-upload mr-1"></i> ஃபைல் அப்லோடு
+                    </button>
+                    <button type="button" id="sign-mode-draw" onclick="setSignMode('draw')" class="py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition">
+                        <i class="fa-solid fa-signature mr-1"></i> திரையில் கையெழுத்திட
+                    </button>
+                </div>
+
+                <!-- Sign Upload Box -->
+                <div id="sign-upload-container" class="mb-5">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">கையெழுத்துப் படத்தை தேர்ந்தெடுக்கவும்</label>
+                    <div id="sign-drop-zone" class="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-xl p-5 text-center cursor-pointer bg-slate-50 hover:bg-emerald-50/40 transition">
+                        <input type="file" id="sign-input" accept="image/jpeg,image/png,image/webp,image/jpg" class="hidden">
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fa-solid fa-pen-fancy text-3xl text-slate-400 mb-2"></i>
+                            <p class="text-sm font-semibold text-slate-700">வெள்ளைத் தாளில் இட்ட கையெழுத்தை அப்லோடு செய்</p>
+                            <p class="text-xs text-slate-400 mt-1">மொபைல் கேமரா அல்லது ஸ்கேன் செய்யப்பட்ட படம்</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sign Drawing Box -->
+                <div id="sign-draw-container" class="mb-5 hidden">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">கீழே உள்ள கட்டத்தில் கையெழுத்திடுங்கள்</label>
+                        <button type="button" onclick="clearSignaturePad()" class="text-xs text-red-600 hover:underline font-semibold">
+                            <i class="fa-solid fa-eraser mr-1"></i> அழிக்க (Clear)
+                        </button>
+                    </div>
+                    <canvas id="sign-pad" class="w-full border-2 border-slate-300 rounded-xl bg-white cursor-crosshair h-36 touch-none"></canvas>
+                    <p class="text-[11px] text-slate-400 mt-1">விரல் அல்லது ஸ்டைலஸ் (Touch / Mouse) பயன்படுத்தி கையெழுத்திடலாம்.</p>
+                </div>
+
+                <!-- Ink Filter & Contrast Controls -->
+                <div class="mb-5 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-3">கையெழுத்தை தூய்மையாக்கும் அமைப்புகள் (Enhancements)</span>
+                    
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold text-slate-700">தெளிவான கறுப்பு மை மாற்றி (B&W Filter)</span>
+                        <input type="checkbox" id="sign-bw-filter" checked class="w-4 h-4 accent-emerald-600 rounded">
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-xs text-slate-500 mb-1">
+                                <span>இருண்மை & தெளிவு (Contrast/Threshold)</span>
+                                <span id="sign-thresh-val">150</span>
+                            </div>
+                            <input type="range" id="sign-threshold" min="60" max="220" value="150" class="w-full accent-emerald-600">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dimension Details -->
+                <div class="p-3.5 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-900">
+                    <p class="font-bold flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-circle-info text-blue-600"></i> TNPSC கையெழுத்து அளவு விபரம்:
+                    </p>
+                    <p>அளவு: <strong>6.0 cm x 2.0 cm (230 x 75 Pixels)</strong>. கோப்பு அளவு <strong>10 KB முதல் 20 KB வரை</strong> மிகச் சரியாக சுருக்கப்படும்.</p>
+                </div>
+            </div>
+
+            <!-- Signature Preview & Download Column -->
+            <div class="lg:col-span-6 flex flex-col items-center">
+                <div class="sticky top-24 w-full bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center">
+                    <div class="w-full flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                        <span class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                            <i class="fa-solid fa-eye text-emerald-600"></i> கையெழுத்து முன்னோட்டம்
+                        </span>
+                        <span class="text-xs px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded border border-emerald-200">
+                            இலக்கு: 10 KB - 20 KB
+                        </span>
+                    </div>
+
+                    <!-- Signature Canvas View -->
+                    <div class="p-6 bg-slate-100 rounded-2xl border border-slate-200 shadow-inner flex justify-center items-center w-full">
+                        <div class="canvas-checkerboard p-1 rounded-xl shadow-md border border-slate-300">
+                            <!-- Official TNPSC Signature Canvas (230 x 75 px) -->
+                            <canvas id="sign-canvas" width="230" height="75" class="rounded bg-white block" style="width: 230px; height: 75px;"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Live File Size Indicator -->
+                    <div class="w-full mt-5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                        <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                            <span class="text-slate-600">கையெழுத்து கோப்பு அளவு (File Size):</span>
+                            <span id="sign-size-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800">
+                                0 KB
+                            </span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                            <div id="sign-size-progress" class="bg-emerald-600 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                        <p id="sign-size-msg" class="text-[11px] text-slate-500 mt-1">
+                            TNPSC வரம்பான 10 KB - 20 KB குள் தானாகவே சுருக்கி வழங்கப்படும்.
+                        </p>
+                    </div>
+
+                    <!-- Download Button -->
+                    <button type="button" id="sign-download-btn" onclick="downloadSign()" class="w-full mt-5 py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-download"></i> கையெழுத்தை பதிவிறக்கு (Download Signature)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Instructions Checklist Card -->
+        <div class="mt-10 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <h4 class="font-bold text-slate-800 text-base mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-emerald-600"></i> TNPSC விண்ணப்ப சரிபார்ப்பு பட்டியல் (Checklist):
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 text-sm"></i>
+                    <div>
+                        <strong class="block text-slate-800">வெள்ளை பின்னணி:</strong>
+                        <span class="text-slate-500">நிழல் மற்றும் பிற நிறங்கள் இன்றி தெளிவான வெள்ளை நிறம் இருக்க வேண்டும்.</span>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 text-sm"></i>
+                    <div>
+                        <strong class="block text-slate-800">பெயர் & தேதி:</strong>
+                        <span class="text-slate-500">விண்ணப்பதாரர் பெயர் மற்றும் புகைப்படம் எடுத்த தேதி கட்டாயம் இருக்க வேண்டும்.</span>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 text-sm"></i>
+                    <div>
+                        <strong class="block text-slate-800">போட்டோ அளவு:</strong>
+                        <span class="text-slate-500">20 KB முதல் 50 KB குள் JPG ஃபார்மட்டில் மட்டுமே இருக்க வேண்டும்.</span>
+                    </div>
+                </div>
+                <div class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5 text-sm"></i>
+                    <div>
+                        <strong class="block text-slate-800">கையெழுத்து அளவு:</strong>
+                        <span class="text-slate-500">10 KB முதல் 20 KB குள் நீலம்/கருப்பு மையுடன் தெளிவான பின்னணியில் இருக்க வேண்டும்.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Custom Notification Box (No alert() used) -->
+    <div id="toast" class="fixed bottom-6 right-6 max-w-sm bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transform transition-all duration-300 translate-y-24 opacity-0 z-50 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-msg" class="text-xs font-medium">செய்தி இங்கே காட்டப்படும்</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>TNPSC Group 4, VAO, Group 2/2A மற்றும் பிற தமிழ்நாடு அரசுப் பணிகளுக்கான போட்டோ & கையெழுத்து ரீசைசர் கருவி.</p>
+            <p class="mt-1 text-[11px] text-slate-400">அனைத்து செயலாக்கங்களும் உங்கள் பிரவுசருக்குள்ளேயே நேரடியாக பாதுகாப்பாக நடைபெறுகிறது (No server upload).</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // State Variables
+        let currentPhotoImg = null;
+        let currentSignImg = null;
+        let photoBlobData = null;
+        let signBlobData = null;
+        let isDrawing = false;
+
+        // Canvas elements
+        const photoCanvas = document.getElementById('photo-canvas');
+        const photoCtx = photoCanvas.getContext('2d');
+        const signCanvas = document.getElementById('sign-canvas');
+        const signCtx = signCanvas.getContext('2d');
+        const signPad = document.getElementById('sign-pad');
+        const signPadCtx = signPad.getContext('2d');
+
+        // Initial default Date setup (Today)
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('photo-date-input').value = todayStr;
+
+        // Setup Signature Pad resolution
+        function setupSignaturePad() {
+            const rect = signPad.getBoundingClientRect();
+            signPad.width = rect.width * 2;
+            signPad.height = rect.height * 2;
+            signPadCtx.scale(2, 2);
+            signPadCtx.lineCap = 'round';
+            signPadCtx.lineJoin = 'round';
+            signPadCtx.lineWidth = 2.5;
+            signPadCtx.strokeStyle = '#000000';
+            clearSignaturePad();
+        }
+
+        function clearSignaturePad() {
+            signPadCtx.fillStyle = '#ffffff';
+            signPadCtx.fillRect(0, 0, signPad.width, signPad.height);
+            renderSignaturePreview();
+        }
+
+        // Tab Switching
+        function switchTab(tab) {
+            const photoBtn = document.getElementById('tab-photo-btn');
+            const signBtn = document.getElementById('tab-sign-btn');
+            const photoSec = document.getElementById('photo-section');
+            const signSec = document.getElementById('sign-section');
+
+            if (tab === 'photo') {
+                photoSec.classList.remove('hidden');
+                signSec.classList.add('hidden');
+                photoBtn.className = "flex items-center gap-2.5 px-6 py-3 font-semibold text-sm rounded-t-xl transition-all border-b-2 border-emerald-600 bg-white text-emerald-700 shadow-sm";
+                signBtn.className = "flex items-center gap-2.5 px-6 py-3 font-semibold text-sm rounded-t-xl transition-all border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100";
+            } else {
+                photoSec.classList.add('hidden');
+                signSec.classList.remove('hidden');
+                signBtn.className = "flex items-center gap-2.5 px-6 py-3 font-semibold text-sm rounded-t-xl transition-all border-b-2 border-emerald-600 bg-white text-emerald-700 shadow-sm";
+                photoBtn.className = "flex items-center gap-2.5 px-6 py-3 font-semibold text-sm rounded-t-xl transition-all border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-100";
+                setTimeout(setupSignaturePad, 50);
+            }
+        }
+
+        // Signature Mode Switch
+        function setSignMode(mode) {
+            const upContainer = document.getElementById('sign-upload-container');
+            const drawContainer = document.getElementById('sign-draw-container');
+            const upBtn = document.getElementById('sign-mode-upload');
+            const drawBtn = document.getElementById('sign-mode-draw');
+
+            if (mode === 'upload') {
+                upContainer.classList.remove('hidden');
+                drawContainer.classList.add('hidden');
+                upBtn.className = "py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-emerald-700 transition";
+                drawBtn.className = "py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition";
+            } else {
+                upContainer.classList.add('hidden');
+                drawContainer.classList.remove('hidden');
+                drawBtn.className = "py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-emerald-700 transition";
+                upBtn.className = "py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition";
+                setupSignaturePad();
+            }
+        }
+
+        // ==========================================
+        // PHOTO GENERATION & RENDERING
+        // ==========================================
+        function renderPhoto() {
+            const resType = document.getElementById('photo-res-select').value;
+            let targetW = 276;
+            let targetH = 354;
+            if (resType === 'portal') {
+                targetW = 130;
+                targetH = 170;
+            }
+
+            photoCanvas.width = targetW;
+            photoCanvas.height = targetH;
+
+            // 1. Fill solid White background (TNPSC standard requirement)
+            photoCtx.fillStyle = '#ffffff';
+            photoCtx.fillRect(0, 0, targetW, targetH);
+
+            const bottomBannerHeight = Math.round(targetH * 0.22); // ~22% for Name & Date box
+            const photoAreaHeight = targetH - bottomBannerHeight;
+
+            // 2. Draw user photo if loaded
+            if (currentPhotoImg) {
+                const zoom = parseInt(document.getElementById('photo-zoom').value) / 100;
+                const offsetX = parseInt(document.getElementById('photo-offset-x').value);
+                const offsetY = parseInt(document.getElementById('photo-offset-y').value);
+
+                // Calculate aspect ratio covering photoAreaHeight
+                const imgRatio = currentPhotoImg.width / currentPhotoImg.height;
+                const areaRatio = targetW / photoAreaHeight;
+                let drawW, drawH;
+
+                if (imgRatio > areaRatio) {
+                    drawH = photoAreaHeight * zoom;
+                    drawW = drawH * imgRatio;
+                } else {
+                    drawW = targetW * zoom;
+                    drawH = drawW / imgRatio;
+                }
+
+                const posX = (targetW - drawW) / 2 + offsetX;
+                const posY = (photoAreaHeight - drawH) / 2 + offsetY;
+
+                // Save context & clip to avoid spilling into bottom banner
+                photoCtx.save();
+                photoCtx.beginPath();
+                photoCtx.rect(0, 0, targetW, photoAreaHeight);
+                photoCtx.clip();
+                photoCtx.drawImage(currentPhotoImg, posX, posY, drawW, drawH);
+                photoCtx.restore();
+            } else {
+                // Placeholder avatar sketch if no image
+                photoCtx.fillStyle = '#e2e8f0';
+                photoCtx.fillRect(0, 0, targetW, photoAreaHeight);
+                photoCtx.fillStyle = '#94a3b8';
+                photoCtx.font = `${Math.round(targetW * 0.06)}px Inter, sans-serif`;
+                photoCtx.textAlign = 'center';
+                photoCtx.fillText("போட்டோ அப்லோடு செய்க", targetW / 2, photoAreaHeight / 2);
+            }
+
+            // 3. Draw Bottom Banner for Name & Date (TNPSC Strict Specification)
+            photoCtx.fillStyle = '#ffffff';
+            photoCtx.fillRect(0, photoAreaHeight, targetW, bottomBannerHeight);
+
+            // Thin separation line
+            photoCtx.strokeStyle = '#000000';
+            photoCtx.lineWidth = 1.2;
+            photoCtx.beginPath();
+            photoCtx.moveTo(0, photoAreaHeight);
+            photoCtx.lineTo(targetW, photoAreaHeight);
+            photoCtx.stroke();
+
+            // Name & Date text
+            const name = (document.getElementById('photo-name-input').value || 'YOUR NAME').trim().toUpperCase();
+            const rawDate = document.getElementById('photo-date-input').value;
+            let formattedDate = 'DD-MM-YYYY';
+            if (rawDate) {
+                const parts = rawDate.split('-');
+                if (parts.length === 3) {
+                    formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`; // DD-MM-YYYY format
+                }
+            }
+
+            photoCtx.fillStyle = '#000000';
+            photoCtx.textAlign = 'center';
+            photoCtx.textBaseline = 'middle';
+
+            // Adaptive font sizes for Name & Date
+            const nameFontSize = Math.max(11, Math.round(targetW * 0.055));
+            const dateFontSize = Math.max(10, Math.round(targetW * 0.050));
+
+            photoCtx.font = `bold ${nameFontSize}px Arial, sans-serif`;
+            photoCtx.fillText(name, targetW / 2, photoAreaHeight + (bottomBannerHeight * 0.35));
+
+            photoCtx.font = `600 ${dateFontSize}px Arial, sans-serif`;
+            photoCtx.fillText(formattedDate, targetW / 2, photoAreaHeight + (bottomBannerHeight * 0.72));
+
+            // Outer border for canvas
+            photoCtx.strokeStyle = '#94a3b8';
+            photoCtx.lineWidth = 1;
+            photoCtx.strokeRect(0, 0, targetW, targetH);
+
+            // 4. Compress to 20 KB - 50 KB strict requirement
+            compressPhotoToTNPSCSize();
+        }
+
+        // Automatic binary compression algorithm to guarantee 20KB - 50KB range
+        function compressPhotoToTNPSCSize() {
+            let minQuality = 0.5;
+            let maxQuality = 0.98;
+            let bestBlob = null;
+            let bestQuality = 0.85;
+
+            // Recursive / iterative quality adjustment to hit ~30KB - 40KB ideally
+            function testQuality(q, attempts) {
+                photoCanvas.toBlob((blob) => {
+                    if (!blob) return;
+                    const sizeKB = blob.size / 1024;
+                    
+                    if (sizeKB >= 20 && sizeKB <= 50) {
+                        bestBlob = blob;
+                        updatePhotoSizeBadge(sizeKB, true);
+                        photoBlobData = blob;
+                        return;
+                    }
+
+                    if (attempts <= 0) {
+                        // Accept closest
+                        bestBlob = blob;
+                        photoBlobData = blob;
+                        updatePhotoSizeBadge(sizeKB, sizeKB >= 20 && sizeKB <= 50);
+                        return;
+                    }
+
+                    if (sizeKB < 20) {
+                        // File is too small, increase quality
+                        minQuality = q;
+                        bestQuality = (minQuality + maxQuality) / 2;
+                        testQuality(bestQuality, attempts - 1);
+                    } else if (sizeKB > 50) {
+                        // File too large, decrease quality
+                        maxQuality = q;
+                        bestQuality = (minQuality + maxQuality) / 2;
+                        testQuality(bestQuality, attempts - 1);
+                    }
+                }, 'image/jpeg', q);
+            }
+
+            testQuality(bestQuality, 5);
+        }
+
+        function updatePhotoSizeBadge(sizeKB, isValid) {
+            const badge = document.getElementById('photo-size-badge');
+            const progress = document.getElementById('photo-size-progress');
+            const msg = document.getElementById('photo-size-msg');
+            const rounded = sizeKB.toFixed(1);
+
+            badge.textContent = `${rounded} KB`;
+
+            // Progress bar mapping (0 KB to 60 KB range)
+            const percent = Math.min(100, Math.max(5, (sizeKB / 50) * 100));
+            progress.style.width = `${percent}%`;
+
+            if (sizeKB >= 20 && sizeKB <= 50) {
+                badge.className = "px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300";
+                progress.className = "bg-emerald-600 h-full transition-all duration-300";
+                msg.innerHTML = `<span class="text-emerald-700 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i>அளவு சரியாக உள்ளது (TNPSC வரம்பு: 20 KB - 50 KB). பதிவிறக்கம் செய்யலாம்!</span>`;
+            } else if (sizeKB < 20) {
+                badge.className = "px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300";
+                progress.className = "bg-amber-500 h-full transition-all duration-300";
+                msg.innerHTML = `<span class="text-amber-700"><i class="fa-solid fa-circle-info mr-1"></i>அளவு 20 KB ஐ விட சற்று குறைவாக உள்ளது. போட்டோ Zoom அல்லது தெளிவை அதிகரிக்கலாம்.</span>`;
+            } else {
+                badge.className = "px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-800 border border-red-300";
+                progress.className = "bg-red-500 h-full transition-all duration-300";
+                msg.innerHTML = `<span class="text-red-700"><i class="fa-solid fa-circle-exclamation mr-1"></i>அளவு 50 KB ஐ விட அதிகம். சுருக்கப்படுகிறது...</span>`;
+            }
+        }
+
+        // ==========================================
+        // SIGNATURE GENERATION & RENDERING
+        // ==========================================
+        function renderSignaturePreview() {
+            // TNPSC standard dimension: 230 x 75 px (6.0cm x 2.0cm)
+            signCanvas.width = 230;
+            signCanvas.height = 75;
+
+            // Fill pure white backdrop
+            signCtx.fillStyle = '#ffffff';
+            signCtx.fillRect(0, 0, 230, 75);
+
+            const isDrawMode = !document.getElementById('sign-draw-container').classList.contains('hidden');
+            const applyBW = document.getElementById('sign-bw-filter').checked;
+            const threshold = parseInt(document.getElementById('sign-threshold').value);
+
+            if (isDrawMode) {
+                // Source is drawn signature pad
+                signCtx.drawImage(signPad, 0, 0, 230, 75);
+            } else if (currentSignImg) {
+                // Source is uploaded image
+                const imgRatio = currentSignImg.width / currentSignImg.height;
+                const canvasRatio = 230 / 75;
+                let drawW = 230;
+                let drawH = 75;
+
+                if (imgRatio > canvasRatio) {
+                    drawW = 230;
+                    drawH = 230 / imgRatio;
+                } else {
+                    drawH = 75;
+                    drawW = 75 * imgRatio;
+                }
+
+                const posX = (230 - drawW) / 2;
+                const posY = (75 - drawH) / 2;
+
+                signCtx.drawImage(currentSignImg, posX, posY, drawW, drawH);
+            } else {
+                signCtx.fillStyle = '#94a3b8';
+                signCtx.font = "12px Inter, sans-serif";
+                signCtx.textAlign = 'center';
+                signCtx.textBaseline = 'middle';
+                signCtx.fillText("கையெழுத்தை உள்ளிடவும்", 115, 37.5);
+            }
+
+            // High Contrast Binarization / Black Ink enhancer
+            if (applyBW && (currentSignImg || isDrawMode)) {
+                const imgData = signCtx.getImageData(0, 0, 230, 75);
+                const data = imgData.data;
+
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    // Grayscale luminance
+                    const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+
+                    // Clean white background, make signature dark/crisp
+                    if (gray > threshold) {
+                        data[i] = 255;
+                        data[i + 1] = 255;
+                        data[i + 2] = 255;
+                    } else {
+                        data[i] = 10;
+                        data[i + 1] = 10;
+                        data[i + 2] = 20;
+                    }
+                }
+                signCtx.putImageData(imgData, 0, 0);
+            }
+
+            // Border
+            signCtx.strokeStyle = '#cbd5e1';
+            signCtx.lineWidth = 1;
+            signCtx.strokeRect(0, 0, 230, 75);
+
+            // Compress to 10 KB - 20 KB
+            compressSignToTNPSCSize();
+        }
+
+        // Strict 10 KB - 20 KB Compressor
+        function compressSignToTNPSCSize() {
+            let quality = 0.88;
+
+            function testSignQuality(q, tries) {
+                signCanvas.toBlob((blob) => {
+                    if (!blob) return;
+                    const sizeKB = blob.size / 1024;
+                    signBlobData = blob;
+
+                    const badge = document.getElementById('sign-size-badge');
+                    const progress = document.getElementById('sign-size-progress');
+                    const msg = document.getElementById('sign-size-msg');
+                    const rounded = sizeKB.toFixed(1);
+
+                    badge.textContent = `${rounded} KB`;
+                    const percent = Math.min(100, (sizeKB / 20) * 100);
+                    progress.style.width = `${percent}%`;
+
+                    if (sizeKB >= 10 && sizeKB <= 20) {
+                        badge.className = "px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300";
+                        progress.className = "bg-emerald-600 h-full transition-all duration-300";
+                        msg.innerHTML = `<span class="text-emerald-700 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i>சரியான அளவு (10 KB - 20 KB)! பதிவிறக்கம் செய்யலாம்.</span>`;
+                    } else if (sizeKB < 10) {
+                        badge.className = "px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300";
+                        progress.className = "bg-amber-500 h-full transition-all duration-300";
+                        msg.innerHTML = `<span class="text-amber-700"><i class="fa-solid fa-circle-info mr-1"></i>அளவு: ${rounded} KB. (விதிமுறை: 10KB - 20KB). JPG தரத்தை கூட்டி சரிசெய்கிறோம்.</span>`;
+                        if (tries > 0 && q < 0.99) {
+                            testSignQuality(Math.min(1.0, q + 0.05), tries - 1);
+                        }
+                    } else {
+                        badge.className = "px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-800 border border-red-300";
+                        progress.className = "bg-red-500 h-full transition-all duration-300";
+                        msg.innerHTML = `<span class="text-red-700"><i class="fa-solid fa-circle-exclamation mr-1"></i>அளவு 20 KB ஐ விட அதிகம். சுருக்கப்படுகிறது...</span>`;
+                        if (tries > 0 && q > 0.3) {
+                            testSignQuality(q - 0.1, tries - 1);
+                        }
+                    }
+                }, 'image/jpeg', q);
+            }
+
+            testSignQuality(quality, 4);
+        }
+
+        // ==========================================
+        // SMART WHITE BACKDROP & AI FILTER
+        // ==========================================
+        function autoRemoveBackdrop() {
+            if (!currentPhotoImg) {
+                showToast("முதலில் ஒரு புகைப்படத்தை அப்லோடு செய்யவும்!", "error");
+                return;
+            }
+
+            // Create temporary canvas for threshold background removal
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = photoCanvas.width;
+            tempCanvas.height = photoCanvas.height;
+
+            // Draw current photo
+            tempCtx.drawImage(photoCanvas, 0, 0);
+            const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imgData.data;
+
+            // Corner sample for background color detection
+            const cornerR = data[0];
+            const cornerG = data[1];
+            const cornerB = data[2];
+
+            const tolerance = 45;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+
+                // Distance from corner background color
+                const diff = Math.sqrt(
+                    Math.pow(r - cornerR, 2) +
+                    Math.pow(g - cornerG, 2) +
+                    Math.pow(b - cornerB, 2)
+                );
+
+                if (diff < tolerance) {
+                    // Turn to pure white
+                    data[i] = 255;
+                    data[i + 1] = 255;
+                    data[i + 2] = 255;
+                }
+            }
+
+            // Put back & re-render
+            photoCtx.putImageData(imgData, 0, 0);
+            compressPhotoToTNPSCSize();
+            showToast("பின்புலம் வெள்ளை நிறமாக மாற்றப்பட்டது!", "success");
+        }
+
+        function resetAdjustments() {
+            document.getElementById('photo-zoom').value = 100;
+            document.getElementById('photo-offset-x').value = 0;
+            document.getElementById('photo-offset-y').value = 0;
+            document.getElementById('zoom-val').textContent = '100%';
+            document.getElementById('y-val').textContent = '0';
+            renderPhoto();
+            showToast("அமைப்புகள் மீட்டமைக்கப்பட்டன.", "info");
+        }
+
+        // ==========================================
+        // DOWNLOAD HANDLERS
+        // ==========================================
+        function downloadPhoto() {
+            if (!photoBlobData) {
+                showToast("பதிவிறக்கம் செய்ய படம் தயாராக இல்லை!", "error");
+                return;
+            }
+            const candidateName = (document.getElementById('photo-name-input').value || 'Candidate').trim().replace(/[^a-zA-Z0-9]/g, '_');
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(photoBlobData);
+            link.download = `TNPSC_Photo_${candidateName}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("புகைப்படம் வெற்றிகரமாக பதிவிறக்கப்பட்டது!", "success");
+        }
+
+        function downloadSign() {
+            if (!signBlobData) {
+                showToast("கையெழுத்து படம் தயாராக இல்லை!", "error");
+                return;
+            }
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(signBlobData);
+            link.download = `TNPSC_Signature.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("கையெழுத்து வெற்றிகரமாக பதிவிறக்கப்பட்டது!", "success");
+        }
+
+        // Toast Helper
+        function showToast(msg, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.textContent = msg;
+
+            if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
+            } else if (type === 'error') {
+                toastIcon.className = "fa-solid fa-circle-xmark text-red-400 text-lg";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-blue-400 text-lg";
+            }
+
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3200);
+        }
+
+        // ==========================================
+        // EVENT LISTENERS & INITIALIZATION
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            renderPhoto();
+            renderSignaturePreview();
+
+            // Photo Input Handling
+            const photoInput = document.getElementById('photo-input');
+            const photoDrop = document.getElementById('photo-drop-zone');
+
+            photoDrop.addEventListener('click', () => photoInput.click());
+            photoInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    loadFileToPhoto(e.target.files[0]);
+                }
+            });
+
+            // Drag and Drop for Photo
+            photoDrop.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                photoDrop.classList.add('border-emerald-500', 'bg-emerald-50/50');
+            });
+            photoDrop.addEventListener('dragleave', () => {
+                photoDrop.classList.remove('border-emerald-500', 'bg-emerald-50/50');
+            });
+            photoDrop.addEventListener('drop', (e) => {
+                e.preventDefault();
+                photoDrop.classList.remove('border-emerald-500', 'bg-emerald-50/50');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    loadFileToPhoto(e.dataTransfer.files[0]);
+                }
+            });
+
+            function loadFileToPhoto(file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        currentPhotoImg = img;
+                        renderPhoto();
+                        showToast("போட்டோ வெற்றிகரமாக சேர்க்கப்பட்டது!", "success");
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Controls listeners
+            document.getElementById('photo-name-input').addEventListener('input', renderPhoto);
+            document.getElementById('photo-date-input').addEventListener('input', renderPhoto);
+            document.getElementById('photo-res-select').addEventListener('change', renderPhoto);
+
+            document.getElementById('photo-zoom').addEventListener('input', (e) => {
+                document.getElementById('zoom-val').textContent = `${e.target.value}%`;
+                renderPhoto();
+            });
+
+            document.getElementById('photo-offset-y').addEventListener('input', (e) => {
+                document.getElementById('y-val').textContent = e.target.value;
+                renderPhoto();
+            });
+
+            document.getElementById('photo-offset-x').addEventListener('input', renderPhoto);
+
+            // Signature Input Handling
+            const signInput = document.getElementById('sign-input');
+            const signDrop = document.getElementById('sign-drop-zone');
+
+            signDrop.addEventListener('click', () => signInput.click());
+            signInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            currentSignImg = img;
+                            renderSignaturePreview();
+                            showToast("கையெழுத்து படம் சேர்க்கப்பட்டது!", "success");
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+
+            // Signature Contrast Slider & BW Filter
+            document.getElementById('sign-threshold').addEventListener('input', (e) => {
+                document.getElementById('sign-thresh-val').textContent = e.target.value;
+                renderSignaturePreview();
+            });
+            document.getElementById('sign-bw-filter').addEventListener('change', renderSignaturePreview);
+
+            // Signature Touch & Draw listeners
+            function getPos(e) {
+                const rect = signPad.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function startDraw(e) {
+                e.preventDefault();
+                isDrawing = true;
+                const pos = getPos(e);
+                signPadCtx.beginPath();
+                signPadCtx.moveTo(pos.x, pos.y);
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const pos = getPos(e);
+                signPadCtx.lineTo(pos.x, pos.y);
+                signPadCtx.stroke();
+            }
+
+            function endDraw(e) {
+                if (!isDrawing) return;
+                isDrawing = false;
+                renderSignaturePreview();
+            }
+
+            signPad.addEventListener('mousedown', startDraw);
+            signPad.addEventListener('mousemove', draw);
+            window.addEventListener('mouseup', endDraw);
+
+            signPad.addEventListener('touchstart', startDraw, { passive: false });
+            signPad.addEventListener('touchmove', draw, { passive: false });
+            signPad.addEventListener('touchend', endDraw);
+        });
+    </script>
+</body>
+</html>
